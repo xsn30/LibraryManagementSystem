@@ -33,7 +33,7 @@ public class BookScene extends Scene {
     private final TextField hiddenCardField = new TextField();
 
     private Label currentStudentLabel = new Label("当前学生：未选择");
-    private enum ScanMode { CHECKOUT, RETURN, ADD_BOOK}
+    private enum ScanMode { CHECKOUT, RETURN}
     private ScanMode currentScanMode = ScanMode.CHECKOUT;
 
     public BookScene(BookController bookController, LibraryApp application) {
@@ -113,11 +113,6 @@ public class BookScene extends Scene {
                     refreshTable();
                     showAlert("还书成功");
                 });
-            });
-        } else if (currentScanMode == ScanMode.ADD_BOOK) {
-            // 扫码添加模式 - 自动打开添加窗口并填充ISBN
-            Platform.runLater(() -> {
-                showPopupWithISBN(barcode); // 自动填充ISBN
             });
         }
     }
@@ -262,12 +257,6 @@ public class BookScene extends Scene {
         var scanReturnButton = new Button("扫码还书");
         var scanCardButton = new Button("刷学生卡");
         var clearStudentButton = new Button("清除学生");
-        var scanAddButton = new Button("扫码添加书籍");
-        scanAddButton.setOnAction(e -> {
-            hiddenBarcodeField.requestFocus();
-            currentScanMode = ScanMode.ADD_BOOK;
-            showAlert("请扫描新书的ISBN条形码");
-        });
 
         // 按钮事件
         scanCheckoutButton.setOnAction(e -> {
@@ -321,7 +310,7 @@ public class BookScene extends Scene {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         return new HBox(10,
-                backButton, addButton, scanAddButton,refreshButton,checkOverdueButton, spacer,
+                backButton, addButton, refreshButton,checkOverdueButton, spacer,
                 scanCardButton, clearStudentButton,
                 scanCheckoutButton, scanReturnButton,
                 checkoutButton, returnButton
@@ -432,96 +421,11 @@ public class BookScene extends Scene {
         popup.show(application.getStage());
         popup.setAutoHide(true);
     }
-    private void showPopupWithISBN(String isbn) {var popup = new Popup();
-        var titleField = new TextField();
-        titleField.setPromptText("Book Title");
-        var authorField = new TextField();
-        authorField.setPromptText("Author");
-        var isbnField = new TextField();
-        isbnField.setPromptText("ISBN");
-        var yearField = new TextField();
-        yearField.setPromptText("Published Year");
-        var genreBox = new ChoiceBox<Book.Genre>();
-        genreBox.getItems().addAll(Book.Genre.values());
-        isbnField.setText(isbn);
-        genreBox.setValue(Book.Genre.FICTION); // 默认类型
-        bookController.validateISBN(isbn, valid -> {
-            Platform.runLater(() -> {
-                if (!valid) {
-                    showAlert("警告：ISBN格式可能不正确（应为13位数字）");
-                }
-            });
-        });
-
-        // 自动聚焦到书名字段，方便继续输入
-        Platform.runLater(() -> titleField.requestFocus());
-
-        var saveButton = new Button("Save");
-        var cancelButton = new Button("Cancel");
-        saveButton.setOnAction(event -> {
-            try {
-                var newBook = new Book(
-                        UUID.randomUUID().toString(),
-                        titleField.getText(),
-                        authorField.getText(),
-                        Integer.parseInt(yearField.getText()),
-                        isbnField.getText(),
-                        genreBox.getValue(),
-                        Book.Status.AVAILABLE
-                );
-
-                // 正确的调用方式：使用bookController而不是bookService
-                bookController.addBook(newBook, books -> {
-                    System.out.println("回调收到的书籍数量: " + books.size());
-                    books.forEach(b -> System.out.println("已有: " + b.getIsbn() + " - " + b.getTitle()));
-
-                    Platform.runLater(() -> {
-                        setBooks(books);
-                        popup.hide();
-                        showAlert("尝试添加: " + newBook.getTitle());
-                    });
-                });
-
-            } catch (NumberFormatException e) {
-                showAlert("请输入正确的出版年份");
-            } catch (Exception e) {
-                showAlert("保存失败: " + e.getMessage());
-            }
-        });
-        cancelButton.setOnAction(event -> popup.hide());
-
-        var buttonBar = new HBox(10, saveButton, cancelButton);
-        buttonBar.setAlignment(Pos.CENTER);
-
-        var vBox = new VBox(10, new Label("扫码添加新书 - 请补充书籍信息"),
-                new Label("ISBN: " + isbn), // 显示扫描的ISBN
-                new Label("书名:"), titleField,
-                new Label("作者:"), authorField,
-                new Label("出版年:"), yearField,
-                new Label("类型:"), genreBox,
-                buttonBar);
-
-        vBox.setAlignment(Pos.CENTER);
-        vBox.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(5), null)));
-        vBox.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
-        vBox.setPrefWidth(350);
-        vBox.setPadding(new Insets(15));
-
-        popup.getContent().add(vBox);
-        popup.show(application.getStage());
-        popup.setAutoHide(true);
-    }
-
-
     private void setBooks(List<Book> books) {
         System.out.println("🎯 setBooks 被调用，收到 " + books.size() + " 本书");
 
         Platform.runLater(() -> {
-            System.out.println("🖥️ 开始更新UI表格");
             bookList.setAll(books);
-            System.out.println("✨ 表格更新完成，当前显示: " + bookList.size() + " 本书");
-
-            // 强制刷新表格显示
             table.refresh();
         });
     }

@@ -172,11 +172,6 @@ public class BookController {
                 .collect(Collectors.toList());
         callback.accept(filtered);
     }
-    public void validateISBN(String isbn, Consumer<Boolean> callback) {
-        // 简单的ISBN格式验证（13位数字）
-        boolean isValid = isbn != null && isbn.matches("\\d{13}");
-        callback.accept(isValid);
-    }
     public String formatISBN(String rawBarcode) {
         if (rawBarcode == null) return null;
 
