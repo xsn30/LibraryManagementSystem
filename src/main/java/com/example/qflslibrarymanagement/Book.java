@@ -19,8 +19,6 @@ public class Book {
     @Column(name = "published_year")
     private int publishedYear;
 
-    @Column(unique = true)
-    private String isbn;
 
     @Enumerated(EnumType.STRING)   // 枚举存字符串
     private Genre genre;
@@ -49,12 +47,11 @@ public class Book {
     public Book() {
     }
 
-    public Book(String id, String title, String author, int publishedYear,String isbn,Genre genre, Status status) {
+    public Book(String id, String title, String author, int publishedYear,Genre genre, Status status) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.publishedYear = publishedYear;
-        this.isbn = isbn;
         this.genre = genre;
         this.status = status;
         this.borrowTime = null;
@@ -62,14 +59,13 @@ public class Book {
         this.borrowerId = null;
         this.borrowerName = null;
     }
-    public Book(String id, String title, String author, int publishedYear, String isbn,
+    public Book(String id, String title, String author, int publishedYear,
                 Genre genre, Status status, LocalDateTime borrowTime, LocalDateTime returnTime,
                 String borrowerId, String borrowerName) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.publishedYear = publishedYear;
-        this.isbn = isbn;
         this.genre = genre;
         this.status = status;
         this.borrowTime = borrowTime;
@@ -87,8 +83,6 @@ public class Book {
     public void setAuthor(String author) { this.author = author; }
     public int getPublishedYear() { return publishedYear; }
     public void setPublishedYear(int publishedYear) { this.publishedYear = publishedYear; }
-    public String getIsbn() { return isbn; }
-    public void setIsbn(String isbn) { this.isbn = isbn; }
     public Genre getGenre() { return genre; }
     public void setGenre(Genre genre) { this.genre = genre; }
     public Status getStatus() { return status; }

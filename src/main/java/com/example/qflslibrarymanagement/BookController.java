@@ -39,9 +39,6 @@ public class BookController {
             // 使用强制刷新的查询
             List<Book> allBooks = bookService.getAllBooksWithRefresh();
 
-            // 检查新书是否在结果中
-            boolean found = allBooks.stream().anyMatch(b -> b.getIsbn().equals(book.getIsbn()));
-
             callback.accept(allBooks);
 
         } catch (Exception e) {
@@ -60,7 +57,13 @@ public class BookController {
         getAllBooks(null, null, callback);
     }
     public void checkoutBook(Book book, Consumer<List<Book>> callback) {
-        boolean success = bookService.borrowBook("defaultUser", book.getId());
+        if (currentStudent == null) {
+            showAlert("请先选择学生");
+            getAllBooks(null, null, callback);
+            return;
+        }
+
+        boolean success = bookService.borrowBook(currentStudent.getId(), book.getId());
         if (success) book.setStatus(Book.Status.CHECKED_OUT);
         getAllBooks(null, null, callback);
     }
@@ -71,25 +74,45 @@ public class BookController {
                     this.currentStudent = student;
                     callback.accept(student);
                 },
-                () -> callback.accept(null)
+                () -> {
+                    this.currentStudent = null; // 清空当前学生
+                    callback.accept(null);
+                }
         );
     }
 
     public void returnByBarcode(String barcode, Consumer<List<Book>> callback) {
         if (currentStudent == null) {
+            showAlert("请先刷学生卡");
             getAllBooks(null, null, callback);
             return;
         }
 
         List<Book> allBooks = bookService.getAllBooks();
         for (Book book : allBooks) {
-            if (book.getIsbn().equals(barcode)) {
+            if (book.getId().equals(barcode)) {
                 boolean success = bookService.returnBook(currentStudent.getId(), book.getId());
-                getAllBooks(null, null, callback);
+                if (success) {
+                    // 还书成功后刷新表格
+                    getAllBooks(null, null, callback);
+                } else {
+                    showAlert("还书失败");
+                    getAllBooks(null, null, callback);
+                }
                 return;
             }
         }
+        showAlert("未找到对应的图书");
         getAllBooks(null, null, callback);
+    }
+    private void showAlert(String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("系统提示");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.show();
+        });
     }
 
     // 获取当前学生
@@ -109,20 +132,40 @@ public class BookController {
     }
 
     public void checkoutByBarcode(String barcode, Consumer<Book> callback) {
-        List<Book> allBooks =bookService.getAllBooks();
+        if (currentStudent == null) {
+            showAlert("请先刷学生卡");
+            callback.accept(null);
+            return;
+        }
+        List<Book> allBooks = bookService.getAllBooks();
         for (Book b : allBooks) {
-            if (b.getIsbn().equals(barcode)) {
-                checkoutBook(b, books -> callback.accept(b));
+            if (b.getId().equals(barcode)) {
+                // 使用当前学生ID借书
+                boolean success = bookService.borrowBook(currentStudent.getId(), b.getId());
+                if (success) {
+                    // 借书成功后刷新整个列表
+                    getAllBooks(null, null, refreshedBooks -> {
+                        Book borrowedBook = refreshedBooks.stream()
+                                .filter(book -> book.getId().equals(barcode))
+                                .findFirst()
+                                .orElse(null);
+                        callback.accept(borrowedBook);
+                    });
+                } else {
+                    showAlert("借书失败：书籍可能已被借出");
+                    callback.accept(null);
+                }
                 return;
             }
         }
+        showAlert("未找到对应的图书");
         callback.accept(null);
     }
 
     public void getBookByBarcode(String barcode, Consumer<Book> callback) {
         List<Book> allBooks = bookService.getAllBooks();
         for (Book b : allBooks) {
-            if (b.getIsbn().equals(barcode)) {
+            if (b.getId().equals(barcode)) {
                 callback.accept(b);
                 return;
             }
@@ -172,36 +215,13 @@ public class BookController {
                 .collect(Collectors.toList());
         callback.accept(filtered);
     }
-    public String formatISBN(String rawBarcode) {
-        if (rawBarcode == null) return null;
-
-        String cleanISBN = rawBarcode.replaceAll("[^\\d]", "");
-
-        // 尝试识别并格式化
-        if (cleanISBN.length() == 10) {
-            // ISBN-10格式
-            return formatISBN10(cleanISBN);
-        } else if (cleanISBN.length() == 13 && (cleanISBN.startsWith("978") || cleanISBN.startsWith("979"))) {
-            // ISBN-13格式
-            return formatISBN13(cleanISBN);
-        } else {
-            // 无法识别，返回原始数字
-            return cleanISBN;
+    public Book getBookById(String id) {
+        List<Book> allBooks = bookService.getAllBooks();
+        for (Book book : allBooks) {
+            if (book.getId().equals(id)) {
+                return book;
+            }
         }
-    }
-
-    private String formatISBN10(String isbn) {
-        return isbn.substring(0, 1) + "-" +
-                isbn.substring(1, 4) + "-" +
-                isbn.substring(4, 9) + "-" +
-                isbn.substring(9);
-    }
-
-    private String formatISBN13(String isbn) {
-        return isbn.substring(0, 3) + "-" +
-                isbn.substring(3, 4) + "-" +
-                isbn.substring(4, 7) + "-" +
-                isbn.substring(7, 12) + "-" +
-                isbn.substring(12);
+        return null;
     }
 }

@@ -7,11 +7,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class LibraryApp extends Application {
@@ -87,5 +89,12 @@ public class LibraryApp extends Application {
         if (springContext != null) {
             springContext.close(); // 关闭 Spring Context
         }
+    }
+    @Bean
+    CommandLineRunner checkData(StudentService studentService) {
+        return args -> {
+            studentService.initTestData(); // 确保初始化数据
+            studentService.checkStudentData(); // 打印当前数据
+        };
     }
 }
