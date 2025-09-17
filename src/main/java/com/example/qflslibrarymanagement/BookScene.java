@@ -76,23 +76,36 @@ public class BookScene extends Scene {
         hiddenCardField.setManaged(false);
 
         hiddenCardField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.endsWith("\n")) {
+            if (!newVal.isEmpty()) {  // 不再依赖换行符
                 String cardId = newVal.trim();
-                System.out.println("读取到卡号: " + cardId);
 
-                // 直接使用cardId，因为它在lambda外部不再修改
+                // 调试日志
+                System.out.println("原始输入内容: [" + newVal + "]");
+                System.out.println("处理后卡号: [" + cardId + "]");
+                System.out.println("卡号长度: " + cardId.length());
+
                 bookController.handleCardScan(cardId, student -> {
                     Platform.runLater(() -> {
                         if (student != null) {
                             currentStudentLabel.setText("当前学生：" + student.getName());
-                            showAlert("学生卡验证成功: " + student.getName());
+                            showAlert("验证成功: " + student.getName());
+                            System.out.println("✅ 学生卡验证成功: " + student.getName() +
+                                    ", 卡号: " + student.getCardId());
                         } else {
+                            currentStudentLabel.setText("当前学生：未选择");
                             showAlert("未找到该学生信息: " + cardId);
                             showAlert("可用测试卡号: CARD001, CARD002, CARD003");
+                            System.out.println("❌ 未找到卡号: " + cardId);
+
+                            // 打印数据库中所有学生卡号
+                            List<Student> allStudents = bookController.getStudentService().getAllStudents();
+                            System.out.println("数据库中现有卡号:");
+                            allStudents.forEach(s -> System.out.println(" - " + s.getCardId()));
                         }
                     });
                 });
-                hiddenCardField.clear();
+
+                hiddenCardField.clear(); // 清空输入框
             }
         });
     }

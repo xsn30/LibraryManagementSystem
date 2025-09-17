@@ -51,6 +51,7 @@ public class LibraryApp extends Application {
         bookController = springContext.getBean(BookController.class);
         StudentService studentService = springContext.getBean(StudentService.class);
         studentService.initTestData(); // 初始化测试学生数据
+        studentService.printAllStudents();
     }
 
 

@@ -69,13 +69,19 @@ public class BookController {
     }
 
     public void handleCardScan(String cardId, Consumer<Student> callback) {
+        System.out.println("[DEBUG] 正在查询卡号: " + cardId + " (原始值)");
+
         studentService.getStudentByCardId(cardId).ifPresentOrElse(
                 student -> {
-                    this.currentStudent = student;
+                    System.out.println("[DEBUG] 找到学生: " + student.getName());
                     callback.accept(student);
                 },
                 () -> {
-                    this.currentStudent = null; // 清空当前学生
+                    System.out.println("[DEBUG] 未找到卡号: " + cardId);
+                    // 打印数据库中所有卡号辅助调试
+                    studentService.getAllStudents().forEach(s ->
+                            System.out.println("现有卡号: " + s.getCardId())
+                    );
                     callback.accept(null);
                 }
         );
@@ -223,5 +229,8 @@ public class BookController {
             }
         }
         return null;
+    }
+    public StudentService getStudentService() {
+        return this.studentService;
     }
 }

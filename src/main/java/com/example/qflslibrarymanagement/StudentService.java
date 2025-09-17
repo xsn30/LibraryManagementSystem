@@ -34,36 +34,39 @@ public class StudentService {
     // 初始化测试学生数据
     // 初始化测试学生数据
     // 修改initTestData方法中的测试数据
+    @Transactional
     public void initTestData() {
-        if (studentRepository.count() == 0) {
-            Student student1 = new Student(
-                    UUID.randomUUID().toString(),
-                    "CARD001",  // 改为与提示一致
-                    "张三",
-                    "20210001"
+        // 添加同步锁防止重复初始化
+        synchronized (this) {
+            if (studentRepository.count() >= 3) {
+                System.out.println("✅ 测试数据已存在，跳过初始化");
+                return;
+            }
+
+            // 清空表（使用原生SQL确保彻底）
+            studentRepository.deleteAllInBatch();
+
+            // 插入测试数据
+            List<Student> testStudents = List.of(
+                    new Student(UUID.randomUUID().toString(), "CARD001", "张三", "20210001"),
+                    new Student(UUID.randomUUID().toString(), "CARD002", "李四", "20210002"),
+                    new Student(UUID.randomUUID().toString(), "CARD003", "王五", "20210003")
             );
 
-            Student student2 = new Student(
-                    UUID.randomUUID().toString(),
-                    "CARD002",   // 改为与提示一致
-                    "李四",
-                    "20210002"
-            );
+            studentRepository.saveAll(testStudents);
+            studentRepository.flush(); // 强制立即提交
 
-            Student student3 = new Student(
-                    UUID.randomUUID().toString(),
-                    "CARD003",      // 改为与提示一致
-                    "王五",
-                    "20210003"
-            );
-
-            studentRepository.save(student1);
-            studentRepository.save(student2);
-            studentRepository.save(student3);
-
-            System.out.println("创建测试学生数据完成");
-            System.out.println("可用测试卡号: CARD001, CARD002, CARD003"); // 与实际数据一致
+            System.out.println("✅ 测试学生数据已重置");
+            printAllStudents(); // 打印验证
         }
+    }
+
+    public void printAllStudents() {
+        System.out.println("=== 当前学生数据 ===");
+        studentRepository.findAll().forEach(s ->
+                System.out.printf("学生: %s, 卡号: [%s], 学号: %s%n",
+                        s.getName(), s.getCardId(), s.getStudentId())
+        );
     }
     // 可以添加一个检查方法
     public void checkStudentData() {
