@@ -34,9 +34,9 @@ public class BookController {
 
     public void addBook(Book book, Consumer<List<Book>> callback) {
         try {
-            // 保存书籍
+            
             Book savedBook = bookService.addBook(book);
-            // 使用强制刷新的查询
+            
             List<Book> allBooks = bookService.getAllBooksWithRefresh();
 
             callback.accept(allBooks);
@@ -48,7 +48,7 @@ public class BookController {
     }
 
     public void updateBook(Book book, Consumer<List<Book>> callback) {
-        bookService.updateBook(book); // save 可以更新或新增
+        bookService.updateBook(book); 
         getAllBooks(null, null, callback);
     }
 
@@ -78,7 +78,7 @@ public class BookController {
                 },
                 () -> {
                     System.out.println("[DEBUG] 未找到卡号: " + cardId);
-                    // 打印数据库中所有卡号辅助调试
+                    
                     studentService.getAllStudents().forEach(s ->
                             System.out.println("现有卡号: " + s.getCardId())
                     );
@@ -99,7 +99,7 @@ public class BookController {
             if (book.getId().equals(barcode)) {
                 boolean success = bookService.returnBook(currentStudent.getId(), book.getId());
                 if (success) {
-                    // 还书成功后刷新表格
+                    
                     getAllBooks(null, null, callback);
                 } else {
                     showAlert("还书失败");
@@ -121,12 +121,12 @@ public class BookController {
         });
     }
 
-    // 获取当前学生
+    
     public Student getCurrentStudent() {
         return currentStudent;
     }
 
-    // 清空当前学生
+    
     public void clearCurrentStudent() {
         this.currentStudent = null;
     }
@@ -146,10 +146,10 @@ public class BookController {
         List<Book> allBooks = bookService.getAllBooks();
         for (Book b : allBooks) {
             if (b.getId().equals(barcode)) {
-                // 使用当前学生ID借书
+                
                 boolean success = bookService.borrowBook(currentStudent.getId(), b.getId());
                 if (success) {
-                    // 借书成功后刷新整个列表
+                    
                     getAllBooks(null, null, refreshedBooks -> {
                         Book borrowedBook = refreshedBooks.stream()
                                 .filter(book -> book.getId().equals(barcode))

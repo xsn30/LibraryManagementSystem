@@ -21,14 +21,14 @@ public class LibraryRepository {
     }
 
     public void updateBook(Book book) {
-        bookRepository.save(book); // save 方法可以新增或更新
+        bookRepository.save(book); 
     }
 
     public void deleteBook(Book book) {
         bookRepository.deleteById(book.getId());
     }
 
-    // 这里可以实现 borrowBook / returnBook 的逻辑，直接操作 Book.status
+    
     public boolean borrowBook(String userId, String bookId) {
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book != null && book.getStatus() == Book.Status.AVAILABLE) {

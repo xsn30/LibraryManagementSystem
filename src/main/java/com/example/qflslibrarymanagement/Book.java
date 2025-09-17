@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-@Entity                       // 告诉 JPA 这是一个实体类
-@Table(name = "books")        // 指定数据库表名为 books
+@Entity                       
+@Table(name = "books")        
 public class Book {
     @Id
     private String id;
@@ -20,7 +20,7 @@ public class Book {
     private int publishedYear;
 
 
-    @Enumerated(EnumType.STRING)   // 枚举存字符串
+    @Enumerated(EnumType.STRING)   
     private Genre genre;
 
     @Column(name = "borrow_time")
@@ -30,7 +30,7 @@ public class Book {
     private LocalDateTime returnTime;
 
     @Column(name = "borrower_id")
-    private String borrowerId; // 借书人ID
+    private String borrowerId; 
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.AVAILABLE;
@@ -74,7 +74,7 @@ public class Book {
         this.borrowerName = borrowerName;
     }
 
-    // Getter 和 Setter
+    
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getTitle() { return title; }
@@ -103,7 +103,7 @@ public class Book {
         return LocalDateTime.now().isAfter(borrowTime.plusWeeks(2));
     }
 
-    // 计算剩余天数的方法
+    
     public long getRemainingDays() {
         if (borrowTime == null || status == Status.AVAILABLE) {
             return 0;

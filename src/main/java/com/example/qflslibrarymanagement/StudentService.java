@@ -31,22 +31,22 @@ public class StudentService {
         return studentRepository.findById(id);
     }
 
-    // 初始化测试学生数据
-    // 初始化测试学生数据
-    // 修改initTestData方法中的测试数据
+    
+    
+    
     @Transactional
     public void initTestData() {
-        // 添加同步锁防止重复初始化
+        
         synchronized (this) {
             if (studentRepository.count() >= 3) {
                 System.out.println("✅ 测试数据已存在，跳过初始化");
                 return;
             }
 
-            // 清空表（使用原生SQL确保彻底）
+            
             studentRepository.deleteAllInBatch();
 
-            // 插入测试数据
+            
             List<Student> testStudents = List.of(
                     new Student(UUID.randomUUID().toString(), "CARD001", "张三", "20210001"),
                     new Student(UUID.randomUUID().toString(), "CARD002", "李四", "20210002"),
@@ -54,10 +54,10 @@ public class StudentService {
             );
 
             studentRepository.saveAll(testStudents);
-            studentRepository.flush(); // 强制立即提交
+            studentRepository.flush(); 
 
             System.out.println("✅ 测试学生数据已重置");
-            printAllStudents(); // 打印验证
+            printAllStudents(); 
         }
     }
 
@@ -68,7 +68,7 @@ public class StudentService {
                         s.getName(), s.getCardId(), s.getStudentId())
         );
     }
-    // 可以添加一个检查方法
+    
     public void checkStudentData() {
         System.out.println("当前学生数量: " + studentRepository.count());
         studentRepository.findAll().forEach(student ->

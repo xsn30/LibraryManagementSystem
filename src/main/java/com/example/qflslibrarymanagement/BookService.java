@@ -15,13 +15,13 @@ public class BookService {
     private final StudentRepository studentRepository;
 
 
-    // 构造方法注入 Repository
+    
     public BookService(BookRepository bookRepository,StudentRepository studentRepository) {
         this.bookRepository = bookRepository;
         this.studentRepository = studentRepository;
     }
 
-    // 添加一本书
+    
     public Book addBook(Book book) {
         try {
             Book savedBook = bookRepository.save(book);
@@ -36,22 +36,22 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    // 获取所有书
+    
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
 
-    // 根据 ID 查书
+    
     public Book getBookById(String id) {
         return bookRepository.findById(id).orElse(null);
     }
 
-    // 删除书
+    
     public void deleteBook(String id) {
         bookRepository.deleteById(id);
     }
 
-    // 借书
+    
     public boolean borrowBook(String studentId, String bookId) {
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book != null && book.getStatus() == Book.Status.AVAILABLE) {
@@ -68,7 +68,7 @@ public class BookService {
         return false;
     }
 
-    // 还书
+    
     public boolean returnBook(String studentId, String bookId) {
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book != null && book.getStatus() == Book.Status.CHECKED_OUT) {
@@ -76,7 +76,7 @@ public class BookService {
             book.setReturnTime(LocalDateTime.now());
             bookRepository.save(book);
 
-            // 检查是否超时
+            
             if (book.getBorrowTime() != null) {
                 LocalDateTime dueDate = book.getBorrowTime().plusWeeks(2);
                 if (LocalDateTime.now().isAfter(dueDate)) {
@@ -87,9 +87,9 @@ public class BookService {
         }
         return false;
     }
-    // 在BookService中添加
+    
     public List<Book> getAllBooksWithRefresh() {
-        // 强制Hibernate刷新缓存
+        
         bookRepository.flush();
         return bookRepository.findAll();
     }

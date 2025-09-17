@@ -76,10 +76,10 @@ public class BookScene extends Scene {
         hiddenCardField.setManaged(false);
 
         hiddenCardField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal.isEmpty()) {  // 不再依赖换行符
+            if (!newVal.isEmpty()) {  
                 String cardId = newVal.trim();
 
-                // 调试日志
+                
                 System.out.println("原始输入内容: [" + newVal + "]");
                 System.out.println("处理后卡号: [" + cardId + "]");
                 System.out.println("卡号长度: " + cardId.length());
@@ -97,7 +97,7 @@ public class BookScene extends Scene {
                             showAlert("可用测试卡号: CARD001, CARD002, CARD003");
                             System.out.println("❌ 未找到卡号: " + cardId);
 
-                            // 打印数据库中所有学生卡号
+                            
                             List<Student> allStudents = bookController.getStudentService().getAllStudents();
                             System.out.println("数据库中现有卡号:");
                             allStudents.forEach(s -> System.out.println(" - " + s.getCardId()));
@@ -105,23 +105,23 @@ public class BookScene extends Scene {
                     });
                 });
 
-                hiddenCardField.clear(); // 清空输入框
+                hiddenCardField.clear(); 
             }
         });
     }
 
     private void handleScannedBarcode(String barcode) {
         if (currentScanMode == ScanMode.CHECKOUT) {
-            // 检查是否已经选择了学生
+            
             if (bookController.getCurrentStudent() == null) {
                 showAlert("❌ 借书失败：请先刷学生卡再借书");
-                // 自动切换到刷卡模式
+                
                 hiddenCardField.requestFocus();
                 showAlert("请先刷学生卡（输入卡号后按回车）");
                 return;
             }
 
-            // 借书模式
+            
             bookController.checkoutByBarcode(barcode, book -> {
                 Platform.runLater(() -> {
                     if (book != null) {
@@ -133,7 +133,7 @@ public class BookScene extends Scene {
                 });
             });
         }  else if (currentScanMode == ScanMode.RETURN) {
-            // 还书模式
+            
             bookController.returnByBarcode(barcode, books -> {
                 Platform.runLater(() -> {
                     refreshTable();
@@ -280,12 +280,12 @@ public class BookScene extends Scene {
         var scanCardButton = new Button("刷学生卡");
         var clearStudentButton = new Button("清除学生");
 
-        // 按钮事件
+        
         scanCheckoutButton.setOnAction(e -> {
-            // 检查是否已经选择了学生
+            
             if (bookController.getCurrentStudent() == null) {
                 showAlert("请先刷学生卡再借书");
-                // 自动聚焦到刷卡字段
+                
                 hiddenCardField.requestFocus();
                 showAlert("请刷学生卡（输入卡号后按回车）");
                 return;
@@ -324,7 +324,7 @@ public class BookScene extends Scene {
             });
         });
 
-        // 表格选择监听
+        
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             checkoutButton.setDisable(newSelection == null || newSelection.getStatus() != Book.Status.AVAILABLE);
             returnButton.setDisable(newSelection == null || newSelection.getStatus() != Book.Status.CHECKED_OUT);
@@ -373,9 +373,9 @@ public class BookScene extends Scene {
         genreBox.getItems().addAll(Book.Genre.values());
 
         if (book != null) {
-            // 编辑现有书籍：显示ID但不能修改
+            
             idField.setText(book.getId());
-            idField.setDisable(true); // 禁止修改已有书籍的ID
+            idField.setDisable(true); 
             titleField.setText(book.getTitle());
             authorField.setText(book.getAuthor());
             yearField.setText(String.valueOf(book.getPublishedYear()));
@@ -386,9 +386,9 @@ public class BookScene extends Scene {
         }
         idField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && newVal.length() > 10 && !newVal.equals(oldVal)) {
-                // 扫码枪通常以回车结束，或者我们可以检测到足够长的输入
+                
                 Platform.runLater(() -> {
-                    // 自动聚焦到下一个字段，提升用户体验
+                    
                     titleField.requestFocus();
                 });
             }
@@ -407,7 +407,7 @@ public class BookScene extends Scene {
                     return;
                 }
 
-                // 检查ID是否已存在（只在添加新书时检查）
+                
                 if (book == null) {
                     Book existingBook = bookController.getBookById(bookId);
                     if (existingBook != null) {
@@ -416,7 +416,7 @@ public class BookScene extends Scene {
                     }
                 }
                 var newBook = book != null ? book : new Book(
-                        bookId, // 使用扫描的UUID
+                        bookId, 
                         titleField.getText(),
                         authorField.getText(),
                         Integer.parseInt(yearField.getText()),

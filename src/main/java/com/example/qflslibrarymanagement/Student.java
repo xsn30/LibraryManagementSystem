@@ -9,15 +9,15 @@ public class Student {
     private String id;
 
     @Column(nullable = false, unique = true)
-    private String cardId;  // 饭卡ID
+    private String cardId;  
 
     @Column(nullable = false)
     private String name;
 
     @Column(unique = true)
-    private String studentId; // 学号
+    private String studentId; 
 
-    // 构造方法
+    
     public Student() {}
 
     public Student(String id, String cardId, String name, String studentId) {
@@ -27,7 +27,7 @@ public class Student {
         this.studentId = studentId;
     }
 
-    // Getter和Setter
+    
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getCardId() { return cardId; }

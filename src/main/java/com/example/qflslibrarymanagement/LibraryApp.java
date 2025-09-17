@@ -37,12 +37,12 @@ public class LibraryApp extends Application {
         System.setProperty("spring.jpa.show-sql", "true");
         System.setProperty("spring.jpa.properties.hibernate.format_sql", "true");
 
-        // 使用 SpringApplicationBuilder 并关闭 headless
+        
         springContext = new SpringApplicationBuilder(LibraryApp.class)
-                .headless(false)   // 保证 JavaFX 可以使用
+                .headless(false)   
                 .run(args);
 
-        // 启动 JavaFX
+        
         Application.launch(args);
     }
 
@@ -50,7 +50,7 @@ public class LibraryApp extends Application {
     public void init() {
         bookController = springContext.getBean(BookController.class);
         StudentService studentService = springContext.getBean(StudentService.class);
-        studentService.initTestData(); // 初始化测试学生数据
+        studentService.initTestData(); 
         studentService.printAllStudents();
     }
 
@@ -59,7 +59,7 @@ public class LibraryApp extends Application {
     public void start(Stage primaryStage) {
         this.stage = primaryStage;
         initializeMainWindow();
-        showHomeScene(); // 直接显示你的主界面
+        showHomeScene(); 
     }
     private void initializeMainWindow() {
         stage.setTitle("图书管理系统");
@@ -79,7 +79,7 @@ public class LibraryApp extends Application {
     public void showBookScene() {
         BookScene bookScene = new BookScene(bookController, this);
         stage.setScene(bookScene);
-        bookScene.refreshTable(); // <-- 一定要刷新一次，从数据库加载
+        bookScene.refreshTable(); 
     }
 
     public Stage getStage() {
@@ -88,14 +88,14 @@ public class LibraryApp extends Application {
     @Override
     public void stop() {
         if (springContext != null) {
-            springContext.close(); // 关闭 Spring Context
+            springContext.close(); 
         }
     }
     @Bean
     CommandLineRunner checkData(StudentService studentService) {
         return args -> {
-            studentService.initTestData(); // 确保初始化数据
-            studentService.checkStudentData(); // 打印当前数据
+            studentService.initTestData(); 
+            studentService.checkStudentData(); 
         };
     }
 }
